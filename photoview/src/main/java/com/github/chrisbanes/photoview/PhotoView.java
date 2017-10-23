@@ -263,4 +263,8 @@ public class PhotoView extends ImageView {
     public void setOnSingleFlingListener(OnSingleFlingListener onSingleFlingListener) {
         attacher.setOnSingleFlingListener(onSingleFlingListener);
     }
+
+    public void setOnPhotoLongPressListener(OnPhotoLongPressListener onPhotoLongPressListener) {
+        attacher.setOnPhotoLongPressListener(onPhotoLongPressListener);
+    }
 }

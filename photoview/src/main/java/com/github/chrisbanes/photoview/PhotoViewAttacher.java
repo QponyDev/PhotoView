@@ -80,6 +80,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
     private OnViewTapListener mViewTapListener;
     private View.OnClickListener mOnClickListener;
     private OnLongClickListener mLongClickListener;
+    private OnPhotoLongPressListener mPhotoLongPressListener;
     private OnScaleChangedListener mScaleChangeListener;
     private OnSingleFlingListener mSingleFlingListener;
     private OnViewDragListener mOnViewDragListener;
@@ -170,6 +171,25 @@ public class PhotoViewAttacher implements View.OnTouchListener,
             public void onLongPress(MotionEvent e) {
                 if (mLongClickListener != null) {
                     mLongClickListener.onLongClick(mImageView);
+                }
+
+                final RectF displayRect = getDisplayRect();
+
+                if (displayRect != null) {
+
+                    final float x = e.getX(), y = e.getY();
+                    // Check to see if the user tapped on the photo
+                    if (displayRect.contains(x, y)) {
+
+                        float xResult = (x - displayRect.left)
+                                / displayRect.width();
+                        float yResult = (y - displayRect.top)
+                                / displayRect.height();
+
+                        if (mPhotoLongPressListener != null) {
+                            mPhotoLongPressListener.onPhotoLongPress(mImageView, xResult, yResult);
+                        }
+                    }
                 }
             }
 
@@ -432,6 +452,10 @@ public class PhotoViewAttacher implements View.OnTouchListener,
 
     public void setOnLongClickListener(OnLongClickListener listener) {
         mLongClickListener = listener;
+    }
+
+    public void setOnPhotoLongPressListener(OnPhotoLongPressListener listener) {
+        mPhotoLongPressListener = listener;
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
