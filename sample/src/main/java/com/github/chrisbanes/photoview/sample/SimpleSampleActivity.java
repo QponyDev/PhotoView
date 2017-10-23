@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.OnMatrixChangedListener;
+import com.github.chrisbanes.photoview.OnPhotoLongPressListener;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.OnSingleFlingListener;
 import com.github.chrisbanes.photoview.PhotoView;
@@ -41,6 +42,7 @@ import java.util.Random;
 public class SimpleSampleActivity extends AppCompatActivity {
 
     static final String PHOTO_TAP_TOAST_STRING = "Photo Tap! X: %.2f %% Y:%.2f %% ID: %d";
+    static final String PHOTO_LONG_PRESS_TOAST_STRING = "Photo Long Press! X: %.2f %% Y:%.2f %% ID: %d";
     static final String SCALE_TOAST_STRING = "Scaled to: %.2ff";
     static final String FLING_LOG_STRING = "Fling velocityX: %.2f, velocityY: %.2f";
 
@@ -139,6 +141,14 @@ public class SimpleSampleActivity extends AppCompatActivity {
         mPhotoView.setOnMatrixChangeListener(new MatrixChangeListener());
         mPhotoView.setOnPhotoTapListener(new PhotoTapListener());
         mPhotoView.setOnSingleFlingListener(new SingleFlingListener());
+        mPhotoView.setOnPhotoLongPressListener(new OnPhotoLongPressListener() {
+            @Override
+            public void onPhotoLongPress(ImageView view, float x, float y) {
+                float xPercentage = x * 100f;
+                float yPercentage = y * 100f;
+                showToast(String.format(PHOTO_LONG_PRESS_TOAST_STRING, xPercentage, yPercentage, view == null ? 0 : view.getId()));
+            }
+        });
     }
 
     private class PhotoTapListener implements OnPhotoTapListener {
