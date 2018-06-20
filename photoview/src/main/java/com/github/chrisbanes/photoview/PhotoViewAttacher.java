@@ -18,6 +18,7 @@ package com.github.chrisbanes.photoview;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Matrix.ScaleToFit;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.MotionEventCompat;
@@ -105,15 +106,15 @@ public class PhotoViewAttacher implements View.OnTouchListener,
             mSuppMatrix.postTranslate(dx, dy);
             checkAndDisplayMatrix();
 
-        /*
-         * Here we decide whether to let the ImageView's parent to start taking
-         * over the touch event.
-         *
-         * First we check whether this function is enabled. We never want the
-         * parent to take over if we're scaling. We then check the edge we're
-         * on, and the direction of the scroll (i.e. if we're pulling against
-         * the edge, aka 'overscrolling', let the parent take over).
-         */
+            /*
+             * Here we decide whether to let the ImageView's parent to start taking
+             * over the touch event.
+             *
+             * First we check whether this function is enabled. We never want the
+             * parent to take over if we're scaling. We then check the edge we're
+             * on, and the direction of the scroll (i.e. if we're pulling against
+             * the edge, aka 'overscrolling', let the parent take over).
+             */
             ViewParent parent = mImageView.getParent();
             if (mAllowParentInterceptOnEdge && !mScaleDragDetector.isScaling() && !mBlockParentIntercept) {
                 if (mScrollEdge == EDGE_BOTH
@@ -179,12 +180,11 @@ public class PhotoViewAttacher implements View.OnTouchListener,
 
                     final float x = e.getX(), y = e.getY();
                     // Check to see if the user tapped on the photo
-                    if (displayRect.contains(x, y)) {
 
-                        float xResult = (x - displayRect.left)
-                                / displayRect.width();
-                        float yResult = (y - displayRect.top)
-                                / displayRect.height();
+                    PointF ratioPress = getPressedPositionAsRatio(displayRect, x, y);
+                    if (checkBounds(ratioPress)) {
+                        float xResult = (x - displayRect.left - mImageView.getPaddingLeft()) / displayRect.width();
+                        float yResult = (y - displayRect.top - mImageView.getPaddingTop()) / displayRect.height();
 
                         if (mPhotoLongPressListener != null) {
                             mPhotoLongPressListener.onPhotoLongPress(mImageView, xResult, yResult);
@@ -227,17 +227,11 @@ public class PhotoViewAttacher implements View.OnTouchListener,
                 }
 
                 if (displayRect != null) {
-
                     // Check to see if the user tapped on the photo
-                    if (displayRect.contains(x, y)) {
-
-                        float xResult = (x - displayRect.left)
-                                / displayRect.width();
-                        float yResult = (y - displayRect.top)
-                                / displayRect.height();
-
+                    PointF ratioPress = getPressedPositionAsRatio(displayRect, x, y);
+                    if (checkBounds(ratioPress)) {
                         if (mPhotoTapListener != null) {
-                            mPhotoTapListener.onPhotoTap(mImageView, xResult, yResult);
+                            mPhotoTapListener.onPhotoTap(mImageView, ratioPress.x, ratioPress.y);
                         }
                         return true;
                     } else {
@@ -276,6 +270,17 @@ public class PhotoViewAttacher implements View.OnTouchListener,
                 return false;
             }
         });
+    }
+
+    private boolean checkBounds(PointF point) {
+        return point.x >= 0 && point.x <= 1.0 && point.y >=0 && point.y <= 1.0;
+    }
+
+    private PointF getPressedPositionAsRatio(RectF displayRect, float x, float y) {
+        float xResult = (x - displayRect.left - mImageView.getPaddingLeft()) / displayRect.width();
+        float yResult = (y - displayRect.top - mImageView.getPaddingTop()) / displayRect.height();
+
+        return new PointF(xResult, yResult);
     }
 
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener newOnDoubleTapListener) {
